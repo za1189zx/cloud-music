@@ -1,0 +1,14 @@
+/* @tailwind base;
+@tailwind components; */
+@tailwind utilities;
+
+@layer utilities {
+  @variants responsive {
+    .flex-center {
+      @apply flex items-center justify-center;
+    }
+  }
+  .slideController {
+    @apply transition-transform duration-500 ease-in-out;
+  }
+}
