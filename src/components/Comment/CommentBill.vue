@@ -68,8 +68,6 @@
           <CommentTools
             btnText="回复"
             :replyText="`回复${item.user.nickname}:`"
-            :resourceId="resourceId"
-            :type="type"
             :cid="item.commentId"
             :t="2"
             @refresh="refreshHandler"
@@ -100,12 +98,9 @@ export default {
       replyFlag: true
     }
   },
+  inject: ['resourceType', 'resourceId'],
   props: {
-    list: Array,
-    // 资源的 id
-    resourceId: [String, Number],
-    // 资源类型, 0: 歌曲; 1: mv; 2: 歌单; 3: 专辑; 4: 电台; 5: 视频; 6: 动态
-    type: Number
+    list: Array
   },
   methods: {
     numToUnitWan,
@@ -122,7 +117,7 @@ export default {
     async likeCommentHandler(cid, index) {
       this.likedFlag = false
       const liked = this.likedMap[index]
-      const { data: res } = await api.likeComment(this.resourceId, cid, liked ? 0 : 1, this.type)
+      const { data: res } = await api.likeComment(this.resourceId, cid, liked ? 0 : 1, this.resourceType)
       if (res.code === 200) {
         this.likedMap[index] = !liked
         if (liked) this.likedCountMap[index]--
@@ -136,10 +131,14 @@ export default {
       this.$store.commit('replyFlag', false)
     },
     async deleteCommentHandler(cid) {
-      const { data: res } = await api.comment(this.resourceId, cid, 0, this.type, this.text)
+      const { data: res } = await api.comment(this.resourceId, cid, 0, this.resourceType, this.text)
       if (res.code === 200) {
         setTimeout(() => {
           this.$emit('refresh')
+          // 返回正确的评论列表有点慢，只好等久一点发两次
+          setTimeout(() => {
+            this.$emit('refresh')
+          }, 1000)
           this.$toast('删除成功')
         }, 500)
       }

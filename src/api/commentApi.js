@@ -1,20 +1,41 @@
 'use strict'
 
 import http from '@/request'
-// import store from '@/store'
 
 const api = {
   /**
-   * 调用此接口 , 传入音乐 id 和 limit 参数 , 可获得该歌单的所有评论 ( 不需要 登录 )
+   * 调用此接口获得评论列表
+   * @param {number} type 数字, 资源类型, 0: 歌曲; 1: mv; 2: 歌单; 3: 专辑; 4: 电台; 5: 视频;
    * @param {number} id 歌单 id
    * @param {number} offset 偏移数量, 用于分页, 如 :( 评论页数 - 1)*20, 其中 20 为 limit 的值
    * @param {number} limit 取出评论数量, 默认为 20
    * @param {number} before 分页参数, 取上一页最后一项的 time 获取下一页数据(获取超过 5000 条评论的时候需要用到)
    * @returns {Promise}
    */
-  getPlaylistComment: (id, offset = undefined, limit = undefined, before = undefined) => {
+  getComment: (type, id, offset = undefined, limit = undefined, before = undefined) => {
+    let url
+    switch (type) {
+      case 0:
+        url = '/comment/music'
+        break
+      case 1:
+        url = '/comment/mv'
+        break
+      case 2:
+        url = '/comment/playlist'
+        break
+      case 3:
+        url = '/comment/album'
+        break
+      case 4:
+        url = '/comment/dj'
+        break
+      case 5:
+        url = '/comment/video'
+        break
+    }
     return http
-      .get('/comment/playlist', {
+      .get(url, {
         params: {
           id,
           offset: offset ? (offset - 1) * (limit || 20) : undefined,
@@ -23,7 +44,7 @@ const api = {
         }
       })
       .catch(err => {
-        throw new Error(err)
+        return err
       })
   },
   /**

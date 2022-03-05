@@ -41,10 +41,11 @@ export const moduleLogin = {
     }
   },
   actions: {
-    async init({ commit }) {
+    async init({ commit, dispatch }) {
       const { data: res } = await api.getLoginStatus()
       if (res.data.account && res.data.profile) {
         commit('setUserInfo', res.data.profile)
+        dispatch('initMsg')
       }
       commit('initialize')
     }

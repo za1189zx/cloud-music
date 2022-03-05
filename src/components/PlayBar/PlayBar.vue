@@ -1,5 +1,7 @@
 <template>
-  <div class="backdrop-filter backdrop-blur-sm w-full h-12 border-t border-b border-black bg-opacity-80 bg-gray-900">
+  <div
+    class="backdrop-filter backdrop-blur-sm w-full h-12 border-t border-b border-black fixed bottom-0 bg-opacity-80 bg-gray-900 z-50"
+  >
     <!-- 版心 -->
     <div class="max-w-6xl h-full mx-auto px-14 flex items-center justify-between">
       <!-- 左侧按钮组 -->

@@ -14,6 +14,11 @@ const routes = [
     path: '/playlist',
     name: 'Playlist',
     component: () => import(/* webpackChunkName: "playlist" */ '@/views/Playlist/Playlist.vue')
+  },
+  {
+    path: '/song',
+    name: 'Song',
+    component: () => import(/* webpackChunkName: "song" */ '@/views/Song/Song.vue')
   }
 ]
 
@@ -23,7 +28,6 @@ const router = createRouter({
 })
 
 router.beforeEach((to, _from, next) => {
-  console.log(store)
   store.commit('toLogin', false)
   window.document.title = to.meta.title === undefined ? '网易云音乐' : to.meta.title
   next()

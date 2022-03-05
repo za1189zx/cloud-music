@@ -18,7 +18,7 @@
       <!-- Footer -->
       <Footer />
       <!-- 播放栏 -->
-      <PlayBar v-if="windowWidth >= 640" class="fixed bottom-0" />
+      <PlayBar v-if="windowWidth >= 640" />
     </div>
   </div>
 </template>

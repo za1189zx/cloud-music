@@ -127,6 +127,7 @@ export default {
           },
           { pattern: /^\S*$/, message: '密码不能包含空格', trigger: 'blur' }
         ],
+        nickname: [],
         agree: [
           {
             validator: async (_rule, value) => {

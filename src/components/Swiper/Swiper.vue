@@ -5,9 +5,8 @@
       <!-- 轮播图 -->
       <a-carousel class="w-192" effect="fade" autoplay :beforeChange="changeHandler" ref="carousel">
         <div v-for="item in bannerList" :key="item.targetId">
-          <router-link to="">
-            <img :src="item.imageUrl" />
-          </router-link>
+          <a v-if="item.url" :href="item.url"> <img :src="item.imageUrl" /> </a>
+          <router-link v-else :to="routerTo(item)"> <img :src="item.imageUrl" /> </router-link>
         </div>
       </a-carousel>
       <!-- 下载按钮 -->
@@ -54,6 +53,10 @@ export default {
       if (this.bannerList.length) return
       const { data: res } = await api.getBanner()
       if (res.banners.length) this.bannerList = res.banners
+    },
+    routerTo(item) {
+      if (item.targetType === 1) return `/song?id=${item.targetId}`
+      else return '/'
     },
     changeHandler(_from, to) {
       this.index = to

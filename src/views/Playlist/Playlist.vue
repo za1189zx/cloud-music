@@ -1,112 +1,41 @@
 <template>
-  <div v-if="playlist" class="max-w-5xl min-h-180 mx-auto lg:border-l lg:border-r border-gray-300 flex bg-white text-xs">
-    <!-- 页面左边 -->
-    <div class="w-full lg:w-3/4 pl-10 pr-7 py-12 lg:border-r border-gray-300">
-      <div class="flex">
-        <!-- 歌单封面 -->
-        <div class="w-1/3 max-w-60 p-1">
-          <img :src="playlist.coverImgUrl + '?param=250y250'" alt="" class="ring-1 ring-gray-300 ring-offset-4" />
-        </div>
-        <!-- 歌单信息 -->
-        <div class="w-2/3 pl-6 pt-1.5">
-          <!-- 歌单名 -->
-          <p class="flex text-xl"><span class="playlist w-14 min-w-14 h-6 mr-2" :style="icon"></span>{{ playlist.name }}</p>
-          <!-- 歌单创建者 -->
-          <p class="h-9 flex items-center text-xs">
-            <!-- 头像 -->
-            <router-link to="">
-              <img :src="playlist.creator.avatarUrl + '?param=36y36'" class="h-full" alt="" />
-            </router-link>
-            <!-- 名字 -->
-            <router-link to="" class="ml-3 text-blue-500 hover:text-blue-500 hover:underline">
-              {{ playlist.creator.nickname }}
-            </router-link>
-            <!-- 徽章 -->
-            <img v-if="playlist.creator.avatarDetail" :src="playlist.creator.avatarDetail.identityIconUrl" class="h-3" />
-            <!-- 创建时间 -->
-            <span class="ml-4">
-              {{ dayjs(this.playlist.createTime).format('YYYY-MM-DD') + ' 创建' }}
-            </span>
-          </p>
-          <!-- 按钮组 -->
-          <p class="h-8 mb-6 flex items-center gap-x-1.5 whitespace-nowrap">
-            <!-- 播放按钮组 -->
-            <span
-              class="h-full border border-blue-700 rounded inline-flex items-center bg-gradient-to-b from-blue-500 to-blue-600 text-white"
-            >
-              <!-- 播放按钮 -->
-              <button
-                class="h-full pl-2 pr-1.5 flex items-center gap-1.5 bg-gradient-to-b hover:from-blue-400 hover:to-blue-500"
-                title="播放"
-              >
-                <FillPlayIcon class="w-4 fill-white" /> 播放
-              </button>
-              <!-- 分割线 -->
-              <span class="h-4 border-l border-blue-800"></span>
-              <!-- 添加到播放列表 -->
-              <button class="w-7 h-full px-1.5 bg-gradient-to-b hover:from-blue-400 hover:to-blue-500" title="添加到播放列表">
-                <AddIcon class="w-4 fill-white" />
-              </button>
-            </span>
-            <!-- 收藏按钮 -->
-            <button
-              :disabled="playlist.subscribed"
-              class="h-full pl-2 pr-1.5 flex items-center gap-1.5 border border-gray-400 rounded bg-gradient-to-b from-white to-gray-200 hover:to-gray-100 disabled:bg-none disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-default"
-            >
-              <AddFolderIcon :class="`w-4 ${playlist.subscribed ? 'fill-gray-400' : 'fill-black'} `" />
-              {{ windowWidth >= 768 && playlist.subscribedCount ? `(${numToUnitWan(playlist.subscribedCount)})` : '收藏' }}
-            </button>
-            <!-- 分享按钮 -->
-            <button
-              class="h-full pl-2 pr-1.5 flex items-center gap-1.5 border border-gray-400 rounded bg-gradient-to-b from-white to-gray-200 hover:to-gray-100"
-            >
-              <ShareIcon class="w-4 fill-black" />
-              {{ windowWidth >= 768 && playlist.shareCount ? `(${numToUnitWan(playlist.shareCount)})` : '分享' }}
-            </button>
-            <!-- 下载按钮 -->
-            <button
-              class="h-full pl-2 pr-1.5 flex items-center gap-0.5 border border-gray-400 rounded bg-gradient-to-b from-white to-gray-200 hover:to-gray-100"
-            >
-              <DownLoadIcon class="w-4 fill-black" />下载
-            </button>
-            <!-- 评论按钮 -->
-            <button
-              class="h-full pl-2 pr-1.5 flex items-center gap-1.5 border border-gray-400 rounded bg-gradient-to-b from-white to-gray-200 hover:to-gray-100"
-              @click="commentBtnHandler"
-            >
-              <CommentIcon class="w-4 fill-black" />
-              {{ windowWidth >= 768 ? `(${playlist.commentCount})` : '评论' }}
-            </button>
-          </p>
-          <!-- 标签 -->
-          <ul class="text-xs flex items-center text-gray-600">
-            <li>标签：</li>
-            <li v-for="item in playlist.tags" :key="item" class="h-6 mr-2">
-              <router-link
-                to=""
-                class="h-full px-3 border border-gray-400 rounded-full flex-center bg-gray-100 hover:bg-gray-50 text-gray-600 hover:text-gray-600"
-              >
-                {{ item }}
-              </router-link>
-            </li>
-          </ul>
-          <!-- 介绍 -->
-          <p class="mb-0 relative overflow-hidden text-gray-600 whitespace-pre-line" ref="description">
-            介绍：{{ descEllip && !opened ? descEllip : playlist.description }}
-          </p>
-          <!-- 展开介绍 -->
-          <p>
-            <a v-if="descEllip" class="flex-center gap-0.5 float-right hover:underline" @click="opened = !opened"
-              >{{ opened ? '收起' : '展开'
-              }}<i
-                :class="`w-2 h-2 block border-gray-600 transform rotate-45 ${
-                  opened ? 'border-t-2 border-l-2 translate-y-0.5' : 'border-b-2 border-r-2'
-                }`"
-              ></i
-            ></a>
-          </p>
-        </div>
-      </div>
+  <PageTemplate
+    v-if="playlist"
+    :resourceName="playlist.name"
+    :subscribed="playlist.subscribed"
+    :subscribedCount="playlist.subscribedCount"
+    :shareCount="playlist.shareCount"
+    :commentCount="commentList.total"
+    :tags="playlist.tags"
+    :description="playlist.description"
+    subscribersTitle="喜欢这个歌单的人"
+    :subscribers="playlist.subscribers"
+    playlistTitle="热门歌单"
+    :relatedList="relatedList"
+  >
+    <template v-slot:cover>
+      <img :src="playlist.coverImgUrl + '?param=250y250'" alt="" class="ring-1 ring-gray-300 ring-offset-4" />
+    </template>
+    <template v-slot:info>
+      <!-- 歌单创建者 -->
+      <p class="h-9 flex items-center text-xs">
+        <!-- 头像 -->
+        <router-link to="">
+          <img :src="playlist.creator.avatarUrl + '?param=36y36'" class="h-full" alt="" />
+        </router-link>
+        <!-- 名字 -->
+        <router-link to="" class="ml-3 text-blue-500 hover:text-blue-500 hover:underline">
+          {{ playlist.creator.nickname }}
+        </router-link>
+        <!-- 徽章 -->
+        <img v-if="playlist.creator.avatarDetail" :src="playlist.creator.avatarDetail.identityIconUrl" class="h-3" />
+        <!-- 创建时间 -->
+        <span class="ml-4">
+          {{ dayjs(this.playlist.createTime).format('YYYY-MM-DD') + ' 创建' }}
+        </span>
+      </p>
+    </template>
+    <template v-slot:module>
       <!-- 歌曲列表 -->
       <Header left="歌曲列表" leftClass="text-xl">
         <template v-slot:left>
@@ -144,7 +73,7 @@
             <!-- 歌名 -->
             <td class="px-2.5 truncate">
               <router-link
-                to=""
+                :to="`song?id=${item.id}`"
                 class="text-gray-700 hover:text-gray-700 hover:underline"
                 :title="item.name + (item.alia[0] ? ` - (${item.alia[0]})` : '')"
               >
@@ -152,7 +81,27 @@
               ><span v-if="item.alia[0]" class="text-gray-400" :title="item.alia[0]"> - ({{ item.alia[0] }})</span>
             </td>
             <!-- 时长 -->
-            <td class="px-2.5 text-gray-500">{{ dayjs(item.dt).format('mm:ss') }}</td>
+            <td class="group px-2.5 text-gray-500">
+              <span class="block group-hover:hidden">{{ dayjs(item.dt).format('mm:ss') }}</span>
+              <div class="w-20 h-4 mr-4 flex-shrink-0 hidden group-hover:flex justify-between">
+                <!-- 添加到播放列表 -->
+                <button class="w-4 h-4" title="添加到播放列表">
+                  <AddIcon class="fill-gray-500 hover:fill-gray-600" />
+                </button>
+                <!-- 收藏 -->
+                <button class="w-4 h-4" title="收藏">
+                  <AddFolderIcon class="fill-gray-500 hover:fill-gray-600" />
+                </button>
+                <!-- 分享 -->
+                <button class="w-4 h-4" title="分享">
+                  <ShareIcon class="fill-gray-500 hover:fill-gray-600" />
+                </button>
+                <!-- 下载 -->
+                <button class="w-4 h-4" title="下载">
+                  <DownLoadIcon class="fill-gray-500 hover:fill-gray-600" />
+                </button>
+              </div>
+            </td>
             <!-- 歌手们 -->
             <td class="px-2.5 truncate">
               <ArtistNames :artists="item.ar" textColor="text-gray-700" intactTitle />
@@ -178,57 +127,8 @@
           >立即下载</router-link
         >
       </div>
-      <!-- 评论区 -->
-      <div ref="scrollTo"></div>
-      <Comment
-        :commentCount="playlist.commentCount"
-        :list="list"
-        :callback="commentCallback"
-        :resourceId="$route.query.id"
-        :type="2"
-        ref="comment"
-      />
-    </div>
-    <!-- 页面右边 -->
-    <div v-if="windowWidth >= 1024" class="w-1/4 h-full pl-7 pr-10 py-5">
-      <!-- 喜欢这个歌单的人 -->
-      <MiniHeader v-if="playlist.subscribers && playlist.subscribers.length" left="喜欢这个歌单的人" />
-      <!-- 头像列表 -->
-      <ul class="grid grid-cols-4 gap-3 mb-6">
-        <li v-for="item in playlist.subscribers" :key="item.id">
-          <router-link to=""><img :src="item.avatarUrl + '?param=40y40'" /></router-link>
-        </li>
-      </ul>
-      <!-- 热门歌单-->
-      <MiniHeader left="热门歌单" />
-      <ul v-if="relatedList">
-        <li v-for="item in relatedList" :key="item.id" class="w-full mb-4">
-          <!-- 封面 -->
-          <router-link :to="`/playlist?id=${item.id}`" class="w-12 float-left" :title="item.name">
-            <img :src="item.coverImgUrl + '?param=50y50'"
-          /></router-link>
-          <div class="w-full pl-14">
-            <!-- 歌单名 -->
-            <p class="w-full h-6 mb-0 leading-6 truncate">
-              <router-link
-                :to="`/playlist?id=${item.id}`"
-                class="text-sm text-black hover:text-black hover:underline"
-                :title="item.name"
-                >{{ item.name }}</router-link
-              >
-            </p>
-            <!-- 创建者 -->
-            <p class="h-6 mb-0 leading-6 text-gray-500">
-              by
-              <router-link to="" class="text-gray-600 hover:text-gray-600 hover:underline" :title="item.creator.nickname">{{
-                item.creator.nickname
-              }}</router-link>
-            </p>
-          </div>
-        </li>
-      </ul>
-    </div>
-  </div>
+    </template>
+  </PageTemplate>
   <div v-if="msg" class="max-w-5xl min-h-180 mx-auto pt-10 lg:border-l lg:border-r border-gray-300 flex justify-center">
     <h1 class="text-4xl font-bold">{{ msg }}</h1>
   </div>
@@ -237,53 +137,47 @@
 <script>
 import api from '@/api'
 import { numToUnitWan } from '@/utils'
-import MiniHeader from '../../components/Header/MiniHeader.vue'
-import AddIcon from '../../components/Icon/AddIcon/AddIcon.vue'
-import FillPlayIcon from '../../components/Icon/PlayIcon/FillPlayIcon.vue'
-import ShareIcon from '../../components/Icon/ShareIcon/ShareIcon.vue'
-import AddFolderIcon from '../../components/Icon/AddFolderIcon/AddFolderIcon.vue'
-import DownLoadIcon from '../../components/Icon/DownLoadIcon/DownLoadIcon.vue'
-import CommentIcon from '../../components/Icon/CommentIcon/CommentIcon.vue'
-import Header from '../../components/Header/Header.vue'
-import ArtistNames from '../../components/ArtistNames/ArtistNames.vue'
-import Comment from '../../components/Comment/Comment.vue'
+import PageTemplate from '@/components/PageTemplate/PageTemplate.vue'
+import Header from '@/components/Header/Header.vue'
+import ArtistNames from '@/components/ArtistNames/ArtistNames.vue'
+import AddIcon from '@/components/Icon/AddIcon/AddIcon.vue'
+import FillPlayIcon from '@/components/Icon/PlayIcon/FillPlayIcon.vue'
+import ShareIcon from '@/components/Icon/ShareIcon/ShareIcon.vue'
+import AddFolderIcon from '@/components/Icon/AddFolderIcon/AddFolderIcon.vue'
+import DownLoadIcon from '@/components/Icon/DownLoadIcon/DownLoadIcon.vue'
+
+import { computed } from 'vue'
 
 export default {
   data() {
     return {
+      resourceType: 2,
       playlist: null,
       icon: `background-image : url(${require('@/assets/sprite/icon.png')})`,
       opened: false,
       relatedList: null,
-      list: {
+      commentList: {
         hotComments: null,
-        comments: null
+        comments: null,
+        total: null
       },
       // 错误信息
       msg: null
     }
   },
+  provide() {
+    return {
+      resourceType: computed(() => this.resourceType),
+      resourceId: computed(() => this.$route.query.id),
+      commentList: computed(() => this.commentList)
+    }
+  },
   watch: {
     '$route.query.id': {
       handler(id) {
-        this.getPlaylist(id)
+        if (this.$route.name === 'Playlist') this.getPlaylist(id)
       },
       immediate: true
-    }
-  },
-  computed: {
-    descEllip() {
-      const desc = this.playlist.description
-      let len = 0
-      const reg = /[^x00-xff]/
-      for (const i in desc) {
-        if (reg.test(desc[i])) len += 2
-        else len += 1
-        if (len >= 200) {
-          return desc.slice(0, i * 1 + 1) + '...'
-        }
-      }
-      return false
     }
   },
   inject: ['windowWidth'],
@@ -292,7 +186,7 @@ export default {
       const [{ data: res1 }, { data: res2 }, { data: res3 }] = await Promise.all([
         api.getPlaylistDetail(id),
         api.getPlaylistRelated(id),
-        api.getPlaylistComment(id)
+        api.getComment(this.resourceType, id)
       ]).catch(err => {
         this.playlist = null
         this.msg = err.data.msg
@@ -308,14 +202,9 @@ export default {
         this.relatedList = res2.playlists
       }
       if (res3.code === 200) {
-        this.list.hotComments = res3.hotComments
-        this.list.comments = res3.comments
-      }
-    },
-    description() {
-      if (this.descSwitch || !this.playlist) return
-      if (this.$refs.description.scrollHeight > this.$refs.description.clientHeight) {
-        this.descSwitch = true
+        this.commentList.hotComments = res3.hotComments
+        this.commentList.comments = res3.comments
+        this.commentList.total = res3.total
       }
     },
     commentBtnHandler() {
@@ -323,23 +212,17 @@ export default {
       this.$refs.scrollTo.nextElementSibling.nextElementSibling.getElementsByTagName('textarea')[0].focus()
     },
 
-    numToUnitWan,
-    commentCallback: api.getPlaylistComment
-  },
-  updated() {
-    this.description()
+    numToUnitWan
   },
   components: {
-    MiniHeader,
+    PageTemplate,
+    Header,
+    ArtistNames,
     AddIcon,
     FillPlayIcon,
     ShareIcon,
     AddFolderIcon,
-    DownLoadIcon,
-    CommentIcon,
-    Header,
-    ArtistNames,
-    Comment
+    DownLoadIcon
   }
 }
 </script>
