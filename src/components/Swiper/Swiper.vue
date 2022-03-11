@@ -56,6 +56,9 @@ export default {
     },
     routerTo(item) {
       if (item.targetType === 1) return `/song?id=${item.targetId}`
+      if (item.targetType === 10) return `/album?id=${item.targetId}`
+      if (item.targetType === 1000) return `/playlist?id=${item.targetId}`
+      if (item.targetType === 1004) return `/mv?id=${item.targetId}`
       else return '/'
     },
     changeHandler(_from, to) {

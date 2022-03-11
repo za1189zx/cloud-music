@@ -3,7 +3,9 @@
     {{ i !== 0 ? '&nbsp;/&nbsp;' : ''
     }}<router-link
       to=""
-      :class="`text-xs ${textColor} ${'hover:' + textColor} hover:underline`"
+      :class="`text-xs ${textColor} ${hoverColor ? 'hover:' + hoverColor : 'hover:' + textColor} ${
+        groupHoverColor ? 'group-hover:' + groupHoverColor : ''
+      } hover:underline`"
       :title="intactTitle ? allAr : artist.name"
     >
       {{ artist.name }}
@@ -16,6 +18,8 @@ export default {
   props: {
     artists: Array,
     textColor: String,
+    hoverColor: String,
+    groupHoverColor: String,
     intactTitle: {
       type: Boolean,
       default: false

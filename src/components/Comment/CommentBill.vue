@@ -7,7 +7,7 @@
     >
       <!-- 评论者头像 -->
       <router-link to="" class="float-left">
-        <img :src="item.user.avatarUrl + '?param=48y48'" class="w-12 h-12" />
+        <img :src="item.user.avatarUrl + '?param=50y50'" class="w-12.5 h-12.5" />
       </router-link>
       <div class="ml-15">
         <p>

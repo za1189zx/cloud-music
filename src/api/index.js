@@ -7,6 +7,7 @@ import commentApi from './commentApi'
 import userApi from './userApi'
 import msgApi from './msgApi'
 import songApi from './songApi'
+import albumApi from './albumApi'
 
 const api = {
   ...loginApi,
@@ -15,7 +16,8 @@ const api = {
   ...commentApi,
   ...userApi,
   ...msgApi,
-  ...songApi
+  ...songApi,
+  ...albumApi
 }
 
 export default api

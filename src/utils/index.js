@@ -16,3 +16,8 @@ export const numToUnitWan = (num, n = 4) => {
   else if (num > 100000000) return Number.parseInt(num / 100000000) + '亿'
   else return Number.parseInt(num / 10000) + '万'
 }
+
+export const uniqueFunc = (arr, uniId) => {
+  const res = new Map()
+  return arr.filter(item => !res.has(item[uniId]) && res.set(item[uniId], 1))
+}

@@ -9,7 +9,7 @@
   <div class="w-full my-5">
     <!-- 你的头像 -->
     <div class="float-left">
-      <img :src="$store.getters.avatarUrl + '?param=48y48'" />
+      <img :src="$store.getters.avatarUrl + '?param=50y50'" />
     </div>
     <!-- 评论 -->
     <div class="ml-16">

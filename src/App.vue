@@ -1,18 +1,11 @@
 <template>
-  <div class="h-screen overflow-scroll">
+  <c-scrollbar height="100vh">
     <!-- 顶部栏 -->
     <TopBar />
-    <!-- toTop 按钮 -->
-    <a-back-top v-if="windowWidth >= 1280" class="rounded-md bg-gray-800 bg-opacity-60 flex-center flex-col">
-      <!-- 箭头 -->
-      <i class="w-2 h-2 block border-t border-l border-white transform rotate-45"></i>
-      <!--Top 文字 -->
-      <span class="leading-4 text-gray-100">Top</span>
-    </a-back-top>
     <!-- 延迟加载 -->
     <div v-if="$store.state.network && $store.state.initialized" class="bg-gray-50">
       <!-- 路由菜单 -->
-      <RouterBar :windowWidth="windowWidth" />
+      <RouterBar v-if="false" :windowWidth="windowWidth" />
       <!-- 路由页面 -->
       <router-view v-if="isRouterShow"></router-view>
       <!-- Footer -->
@@ -20,7 +13,7 @@
       <!-- 播放栏 -->
       <PlayBar v-if="windowWidth >= 640" />
     </div>
-  </div>
+  </c-scrollbar>
 </template>
 
 <script>

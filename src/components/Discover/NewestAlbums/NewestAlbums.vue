@@ -14,11 +14,11 @@
         <ul class="w-1/2 mb-0 inline-grid gap-x-4 grid-cols-10" v-for="n in 2" :key="n">
           <li v-for="item in newestAlbums" :key="item.id">
             <!-- 专辑封面 -->
-            <AlbumBox :picUrl="item.picUrl + '?param=200y200'" :albumName="item.name">
+            <AlbumBox :albumId="item.id" :picUrl="item.picUrl + '?param=200y200'" :albumName="item.name">
               <div class="w-5/6">
                 <!-- 专辑名 -->
                 <router-link
-                  to=""
+                  :to="`album?id=${item.id}`"
                   class="block text-xs text-gray-800 hover:text-gray-800 hover:underline truncate"
                   :title="item.name"
                 >

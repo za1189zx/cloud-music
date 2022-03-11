@@ -14,7 +14,16 @@
           <!-- 榜单按钮 -->
           <div class="w-13 h-10 flex items-center justify-between">
             <!-- 播放 -->
-            <button class="w-5 h-5" title="播放">
+            <button
+              class="w-5 h-5"
+              title="播放"
+              @click="
+                () => {
+                  $store.commit('resetAudioTracks', item.tracks)
+                  $store.commit('toPlay', item.tracks[0].id)
+                }
+              "
+            >
               <FillPlayIcon class="fill-gray-400 hover:fill-gray-500" />
             </button>
             <!-- 收藏 -->
@@ -41,11 +50,20 @@
           </router-link>
           <div class="w-16 h-4 mr-4 flex-shrink-0 hidden group-hover:flex justify-between">
             <!-- 播放 -->
-            <button class="w-4 h-4" title="播放">
+            <button
+              class="w-4 h-4"
+              title="播放"
+              @click="
+                () => {
+                  $store.commit('addAudioTracks', [song])
+                  $store.commit('toPlay', song.id)
+                }
+              "
+            >
               <FillPlayIcon class="fill-gray-400 hover:fill-gray-500" />
             </button>
             <!-- 添加到播放列表 -->
-            <button class="w-4 h-4" title="添加到播放列表">
+            <button class="w-4 h-4" title="添加到播放列表" @click="$store.commit('addAudioTracks', [song])">
               <AddIcon class="fill-gray-400 hover:fill-gray-500" />
             </button>
             <!-- 收藏 -->

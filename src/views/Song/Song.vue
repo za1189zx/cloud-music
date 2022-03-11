@@ -4,6 +4,7 @@
     :resourceName="songDetail.name"
     :alia="songDetail.tns ? songDetail.tns[0] : null"
     :lrc="lrc"
+    :tracks="[songDetail]"
     playlistTitle="包含这首歌的歌单"
     :relatedList="simiPlayList"
     :simiSongsList="simiSongsList"
@@ -16,7 +17,7 @@
       <p class="text-gray-400">歌手：<ArtistNames :artists="songDetail.ar" textColor="text-blue-600" /></p>
       <!-- 所属专辑 -->
       <p class="text-gray-400">
-        所属专辑：<router-link to="" class="text-blue-600 hover:text-blue-600 hover:underline">{{
+        所属专辑：<router-link :to="`album?id=${songDetail.al.id}`" class="text-blue-600 hover:text-blue-600 hover:underline">{{
           songDetail.al.name
         }}</router-link
         ><span v-if="songDetail.al.tns && songDetail.al.tns.length"> - ({{ songDetail.al.tns[0] }})</span>
@@ -106,10 +107,9 @@ export default {
         this.commentList.comments = res5.comments
         this.commentList.total = res5.total
       }
+      api.checkMusic(id).catch(err => (this.songDetail.disabled = err.data.message))
     }
   },
   components: { PageTemplate, AlbumBoxCircle, ArtistNames }
 }
 </script>
-
-<style></style>

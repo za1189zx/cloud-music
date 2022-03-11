@@ -14,6 +14,8 @@ import { antD } from '@/antD'
 import { emojiMap } from '@/assets/emoji.js'
 // 引入自定义指令
 import directive from '@/directive'
+// 引入自定义滚动条组件
+import CScrollbar from 'c-scrollbar'
 
 const app = createApp(App)
 
@@ -21,6 +23,6 @@ const app = createApp(App)
 app.config.globalProperties.dayjs = dayjs
 app.config.globalProperties.emojiMap = emojiMap
 app.config.unwrapInjectedRef = true
-app.use(Toast).use(Loading).use(antD).use(directive)
+app.use(Toast).use(Loading).use(antD).use(directive).use(CScrollbar)
 
 app.use(store).use(router).mount('#app')

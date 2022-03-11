@@ -235,7 +235,7 @@ export default {
           this.$emit('refresh')
           this.$toast('评论成功')
         }, 500)
-      }
+      } else this.$toast(res.message)
     }
   },
   emits: ['refresh'],

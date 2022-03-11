@@ -20,22 +20,42 @@
           <p class="h-8 mb-6 flex items-center gap-x-1.5 whitespace-nowrap">
             <!-- 播放按钮组 -->
             <span
+              v-if="!disabled"
               class="h-full border border-blue-700 rounded inline-flex items-center bg-gradient-to-b from-blue-500 to-blue-600 text-white"
             >
               <!-- 播放按钮 -->
               <button
                 class="h-full pl-2 pr-1.5 flex items-center gap-1.5 bg-gradient-to-b hover:from-blue-400 hover:to-blue-500"
                 title="播放"
+                @click="
+                  () => {
+                    $store.commit('resetAudioTracks', tracks)
+                    $store.commit('toPlay', 'first')
+                  }
+                "
               >
                 <FillPlayIcon class="w-4 fill-white" /> 播放
               </button>
               <!-- 分割线 -->
               <span class="h-4 border-l border-blue-800"></span>
               <!-- 添加到播放列表 -->
-              <button class="w-7 h-full px-1.5 bg-gradient-to-b hover:from-blue-400 hover:to-blue-500" title="添加到播放列表">
+              <button
+                class="w-7 h-full px-1.5 bg-gradient-to-b hover:from-blue-400 hover:to-blue-500"
+                title="添加到播放列表"
+                @click="$store.commit('addAudioTracks', tracks)"
+              >
                 <AddIcon class="w-4 fill-white" />
               </button>
             </span>
+            <!-- 禁止播放 -->
+            <button
+              v-if="disabled"
+              class="h-full pl-2 pr-1.5 flex items-center gap-1.5 border border-gray-400 rounded bg-gray-200 text-gray-400 cursor-default"
+              title="亲爱的, 暂无版权"
+            >
+              <FillPlayIcon class="w-4 fill-gray-400" /> 播放
+            </button>
+
             <!-- 收藏按钮 -->
             <button
               :disabled="subscribed"
@@ -85,7 +105,7 @@
           <!-- 歌词 -->
           <StaticLyric v-if="lrc" :lyric="lrc.lyric" :tlyric="lrc.tlyric" :opened="opened" @tooLong="lyricEllip = true" />
           <!-- 展开 -->
-          <p>
+          <p class="h-4">
             <a
               v-if="descEllip || lyricEllip"
               :class="`flex-center gap-0.5 hover:underline ${descEllip ? 'float-right' : 'float-left'}`"
@@ -99,10 +119,135 @@
             ></a>
           </p>
           <!-- 歌词贡献者 -->
-          <p></p>
+          <p v-if="lrc && (lrc.lyricUser || lrc.transUser)" class="text-gray-600 text-right">
+            <span v-if="lrc.lyricUser">贡献滚动歌词：</span
+            ><router-link to="" v-if="lrc.lyricUser" class="text-blue-600 hover:text-blue-600 underline hover:underline">{{
+              lrc.lyricUser.nickname
+            }}</router-link
+            ><span v-if="lrc.transUser" class="ml-6">贡献翻译：</span
+            ><router-link v-if="lrc.transUser" to="" class="text-blue-600 hover:text-blue-600 underline hover:underline">{{
+              lrc.transUser.nickname
+            }}</router-link>
+          </p>
         </div>
       </div>
-      <slot name="module"></slot>
+      <!-- 歌曲列表 -->
+      <Header v-if="tracks && resourceType" left="歌曲列表" leftClass="text-xl">
+        <template v-if="trackCount" v-slot:left>
+          <!-- 歌曲数量 -->
+          <span class="pl-4 text-gray-600">{{ trackCount + '首歌' }}</span>
+        </template>
+        <template v-if="playCount" v-slot:right>
+          <!-- 播放次数 -->
+          <div class="text-gray-600">
+            播放：<span class="text-red-800 font-bold">{{ playCount }}</span
+            >次
+          </div>
+        </template>
+      </Header>
+      <!-- 列表 -->
+      <table v-if="tracks && resourceType" class="w-full border border-gray-300 table-fixed">
+        <thead class="h-9 border-b border-gray-300">
+          <tr class="divide-x divide-gray-300 bg-gradient-to-b from-white to-gray-100">
+            <th></th>
+            <th :class="`${resourceType == 3 ? 'w-1/2' : 'w-1/3'} pl-3 text-gray-600 font-normal`">歌曲标题</th>
+            <th class="w-1/6 pl-3 text-gray-600 font-normal">时长</th>
+            <th class="pl-3 text-gray-600 font-normal">歌手</th>
+            <th v-if="resourceType !== 3" class="w-1/5 pl-3 text-gray-600 font-normal">专辑</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="(item, index) in tracks"
+            :key="item.id"
+            :class="`w-full h-8 odd:bg-gray-100 ${item.disabled ? 'text-gray-400' : ''}`"
+          >
+            <!-- 标号 -->
+            <td>
+              <div class="flex items-center justify-around">
+                <span>{{ index + 1 }}</span>
+                <span v-if="item.disabled" class="w-4"><FillPlayIcon class="fill-gray-300" /></span>
+                <!-- 播放按钮 -->
+                <button
+                  v-else
+                  class="w-4"
+                  @click="
+                    () => {
+                      $store.commit('addAudioTracks', [item])
+                      $store.commit('toPlay', item.id)
+                    }
+                  "
+                >
+                  <FillPlayIcon class="fill-gray-400 hover:fill-gray-500" />
+                </button>
+              </div>
+            </td>
+            <!-- 歌名 -->
+            <td class="px-2.5 truncate">
+              <router-link
+                :to="`song?id=${item.id}`"
+                :class="`hover:underline ${
+                  item.disabled ? 'text-gray-400 hover:text-gray-400 ' : 'text-gray-700 hover:text-gray-700'
+                }`"
+                :title="item.name + (item.alia[0] ? ` - (${item.alia[0]})` : '')"
+              >
+                {{ item.name }} </router-link
+              ><span v-if="item.alia[0]" class="text-gray-400" :title="item.alia[0]"> - ({{ item.alia[0] }})</span>
+            </td>
+            <!-- 时长 -->
+            <td class="group px-2.5">
+              <span :class="`block ${item.disabled ? '' : 'group-hover:hidden'}`">{{ dayjs(item.dt).format('mm:ss') }}</span>
+              <!-- 按钮组 -->
+              <div v-if="!item.disabled" class="w-20 h-4 mr-4 flex-shrink-0 hidden group-hover:flex justify-between">
+                <!-- 添加到播放列表 -->
+                <button class="w-4 h-4" title="添加到播放列表" @click="$store.commit('addAudioTracks', [item])">
+                  <AddIcon class="fill-gray-500 hover:fill-gray-600" />
+                </button>
+                <!-- 收藏 -->
+                <button class="w-4 h-4" title="收藏">
+                  <AddFolderIcon class="fill-gray-500 hover:fill-gray-600" />
+                </button>
+                <!-- 分享 -->
+                <button class="w-4 h-4" title="分享">
+                  <ShareIcon class="fill-gray-500 hover:fill-gray-600" />
+                </button>
+                <!-- 下载 -->
+                <button class="w-4 h-4" title="下载">
+                  <DownLoadIcon class="fill-gray-500 hover:fill-gray-600" />
+                </button>
+              </div>
+            </td>
+            <!-- 歌手们 -->
+            <td class="px-2.5 truncate">
+              <ArtistNames :artists="item.ar" :textColor="item.disabled ? 'text-gray-400' : 'text-gray-700'" intactTitle />
+            </td>
+            <!-- 专辑 -->
+            <td v-if="resourceType !== 3" class="px-2.5 truncate">
+              <router-link
+                :to="`/album?id=${item.al.id}`"
+                :class="`hover:underline ${
+                  item.disabled ? 'text-gray-400 hover:text-gray-400 ' : 'text-gray-700 hover:text-gray-700'
+                }`"
+                :title="item.al.name"
+              >
+                {{ item.al.name }}
+              </router-link>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <!-- 更多内容下载 -->
+      <div
+        v-if="tracks && trackCount && trackCount > tracks.length"
+        class="w-full h-16 mt-8 flex flex-col items-center justify-between"
+      >
+        <div class="text-sm">查看更多内容，请下载客户端</div>
+        <router-link
+          to=""
+          class="w-32 h-8 rounded-full flex-center flex-shrink-0 bg-gradient-to-r from-red-500 to-red-600 text-white hover:text-white"
+          >立即下载</router-link
+        >
+      </div>
       <!-- 评论区 -->
       <div ref="scrollTo"></div>
       <Comment />
@@ -119,29 +264,33 @@
       </ul>
       <!-- 相关歌单-->
       <MiniHeader v-if="relatedList && relatedList.length && playlistTitle" :left="playlistTitle" />
-      <!-- 歌单列表 -->
+      <!-- 相关列表 -->
       <ul v-if="relatedList && relatedList.length">
         <li v-for="item in relatedList" :key="item.id" class="w-full mb-4">
           <!-- 封面 -->
-          <router-link :to="`/playlist?id=${item.id}`" class="w-12 float-left" :title="item.name">
-            <img :src="item.coverImgUrl + '?param=50y50'"
+          <router-link :to="`/${iconClass}?id=${item.id}`" class="w-12 float-left" :title="item.name">
+            <img :src="(item.coverImgUrl || item.picUrl) + '?param=50y50'"
           /></router-link>
           <div class="w-full pl-14">
             <!-- 歌单名 -->
             <p class="w-full h-6 mb-0 leading-6 truncate">
               <router-link
-                :to="`/playlist?id=${item.id}`"
+                :to="`/${iconClass}?id=${item.id}`"
                 class="text-sm text-black hover:text-black hover:underline"
                 :title="item.name"
                 >{{ item.name }}</router-link
               >
             </p>
             <!-- 创建者 -->
-            <p class="h-6 mb-0 leading-6 text-gray-500">
+            <p v-if="item.creator" class="h-6 mb-0 leading-6 text-gray-500">
               by
               <router-link to="" class="text-gray-600 hover:text-gray-600 hover:underline" :title="item.creator.nickname">{{
                 item.creator.nickname
               }}</router-link>
+            </p>
+            <!-- 发行时间 -->
+            <p v-else-if="resourceType === 3" class="h-6 mb-0 leading-6 text-gray-500">
+              {{ dayjs(item.publishTime).format('YYYY-MM-DD') }}
             </p>
           </div>
         </li>
@@ -178,6 +327,7 @@
 </template>
 
 <script>
+import Header from '@/components/Header/Header.vue'
 import Comment from '../Comment/Comment.vue'
 import MiniHeader from '../../components/Header/MiniHeader.vue'
 import ArtistNames from '../ArtistNames/ArtistNames.vue'
@@ -218,6 +368,12 @@ export default {
     description: String,
     // 歌词
     lrc: Object,
+    // 播放列表数量
+    trackCount: Number,
+    // 播放量
+    playCount: Number,
+    // 播放列表
+    tracks: Array,
     // 右侧数据
     // 收藏
     subscribersTitle: String,
@@ -229,12 +385,18 @@ export default {
     simiSongsList: Array
   },
   computed: {
+    disabled() {
+      if (this.tracks.some(item => !item.disabled)) return false
+      else return true
+    },
     iconClass() {
       switch (this.resourceType) {
         case 0:
           return 'song'
         case 2:
           return 'playlist'
+        case 3:
+          return 'album'
         default:
           return ''
       }
@@ -263,6 +425,7 @@ export default {
     numToUnitWan
   },
   components: {
+    Header,
     Comment,
     MiniHeader,
     ArtistNames,
@@ -283,5 +446,8 @@ export default {
 }
 .song {
   background-position: 0 -463px;
+}
+.album {
+  background-position: 0 -186px;
 }
 </style>

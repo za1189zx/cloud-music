@@ -46,9 +46,6 @@ const errorHandle = (status, other) => {
       store.commit('setUserInfo', null)
       store.commit('toLogin', true)
       break
-    case 404:
-      Toast('请求的资源不存在')
-      break
     case 509:
       Toast('密码错误超过限制')
       break

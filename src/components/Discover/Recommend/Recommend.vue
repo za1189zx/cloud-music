@@ -2,8 +2,8 @@
   <ul class="sm:mt-5 grid gap-x-4 lg:gap-x-8 grid-cols-3 sm:grid-cols-5">
     <li v-for="item in recommendList" :key="item.id">
       <!-- 路由链接 -->
-      <router-link
-        :to="routerTo(item)"
+      <a
+        @click="$router.push(routerTo(item))"
         :class="`${item.id === 'taste' ? 'square ' : ' '}group block w-full border border-gray-300 relative overflow-hidden`"
       >
         <!-- 每日歌曲推荐 -->
@@ -32,17 +32,17 @@
           </div>
         </div>
         <!-- play icon -->
-        <PlayIcon />
+        <PlayIcon @click.stop="play(item.id, item.program)" />
         <!-- 推荐原因 -->
         <div
           class="w-full px-2 py-1 bg-black bg-opacity-60 absolute top-0 text-sm text-gray-300 transform transition-transform delay-700 -translate-y-full md:group-hover:translate-y-0"
         >
           {{ item.copywriter || '热门推荐' }}
         </div>
-      </router-link>
+      </a>
       <!-- 描述文本 -->
       <router-link
-        to="/"
+        :to="routerTo(item)"
         class="webkit-box line-3 h-8 sm:h-15 px-1 mt-1 mb-3.5 text-xs sm:text-sm text-black hover:text-black hover:underline overflow-hidden overflow-ellipsis"
         :title="item.name"
       >
@@ -55,6 +55,7 @@
 
 <script>
 import PlayIcon from '@/components/Icon/PlayIcon/PlayIcon.vue'
+import api from '@/api'
 import { numToUnitWan } from '@/utils'
 
 export default {
@@ -74,6 +75,19 @@ export default {
       if (item.id === 'taste') return '/'
       else if (item.program) return '/'
       else return `/playlist?id=${item.id}`
+    },
+    async play(id, program) {
+      if (id === 'taste') return
+      else if (program) return
+      const { data: res } = await api.getPlaylistDetail(id)
+      if (res.code === 200) {
+        const tracks = res.playlist.tracks
+        res.privileges.forEach((item, index) => {
+          if (!item.fee && !item.subp) tracks[index].disabled = '亲爱的,暂无版权'
+        })
+        this.$store.commit('resetAudioTracks', tracks)
+        this.$store.commit('toPlay', tracks[0].id)
+      }
     },
     numToUnitWan
   },
