@@ -103,7 +103,7 @@
             介绍：{{ descEllip && !opened ? descEllip : description }}
           </p>
           <!-- 歌词 -->
-          <StaticLyric v-if="lrc" :lyric="lrc.lyric" :tlyric="lrc.tlyric" :opened="opened" @tooLong="lyricEllip = true" />
+          <Lyric v-if="lrc" :lyric="lrc.lyric" :tlyric="lrc.tlyric" :opened="opened" @tooLong="lyricEllip = true" />
           <!-- 展开 -->
           <p class="h-4">
             <a
@@ -268,14 +268,14 @@
       <ul v-if="relatedList && relatedList.length">
         <li v-for="item in relatedList" :key="item.id" class="w-full mb-4">
           <!-- 封面 -->
-          <router-link :to="`/${iconClass}?id=${item.id}`" class="w-12 float-left" :title="item.name">
+          <router-link :to="`/${relatedType}?id=${item.id}`" class="w-12 float-left" :title="item.name">
             <img :src="(item.coverImgUrl || item.picUrl) + '?param=50y50'"
           /></router-link>
           <div class="w-full pl-14">
             <!-- 歌单名 -->
             <p class="w-full h-6 mb-0 leading-6 truncate">
               <router-link
-                :to="`/${iconClass}?id=${item.id}`"
+                :to="`/${relatedType}?id=${item.id}`"
                 class="text-sm text-black hover:text-black hover:underline"
                 :title="item.name"
                 >{{ item.name }}</router-link
@@ -337,7 +337,7 @@ import ShareIcon from '../Icon/ShareIcon/ShareIcon.vue'
 import AddFolderIcon from '../Icon/AddFolderIcon/AddFolderIcon.vue'
 import DownLoadIcon from '../Icon/DownLoadIcon/DownLoadIcon.vue'
 import CommentIcon from '../Icon/CommentIcon/CommentIcon.vue'
-import StaticLyric from '@/components/Lyric/StaticLyric.vue'
+import Lyric from '@/components/Lyric/Lyric.vue'
 import { numToUnitWan } from '@/utils'
 
 export default {
@@ -401,6 +401,17 @@ export default {
           return ''
       }
     },
+    relatedType() {
+      switch (this.resourceType) {
+        case 0:
+        case 2:
+          return 'playlist'
+        case 3:
+          return 'album'
+        default:
+          return ''
+      }
+    },
     descEllip() {
       if (!this.description) return false
       const desc = this.description
@@ -435,7 +446,7 @@ export default {
     AddFolderIcon,
     DownLoadIcon,
     CommentIcon,
-    StaticLyric
+    Lyric
   }
 }
 </script>

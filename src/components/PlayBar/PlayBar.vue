@@ -173,7 +173,23 @@
             </c-scrollbar>
           </div>
           <div class="backdrop-filter backdrop-blur-xl w-2/5 h-full flex-shrink-0 bg-opacity-80 bg-gray-900">
-            <!-- <c-scrollbar height="100%"></c-scrollbar> -->
+            <c-scrollbar
+              height="100%"
+              :vBarStyle="{ 'background-color': 'black' }"
+              :vThumbStyle="{ 'background-color': 'rgba(255, 255, 255, 0.2)' }"
+            >
+              <Lyric
+                v-if="lrc"
+                :lyric="lrc.lyric"
+                :tlyric="lrc.tlyric"
+                :opened="true"
+                beCenter
+                :lyricProgress="lyricProgress"
+                currentClass="text-gray-200 text-sm"
+                class="text-gray-500 text-xs"
+                v-model:manualChangeProgress="manualChangeProgress"
+              />
+            </c-scrollbar>
           </div>
         </div>
       </div>
@@ -196,6 +212,7 @@ import CleanIcon from '../Icon/CleanIcon/CleanIcon.vue'
 import ArtistNames from '../ArtistNames/ArtistNames.vue'
 import api from '@/api'
 import XIcon from '../Icon/XIcon/XIcon.vue'
+import Lyric from '@/components/Lyric/Lyric.vue'
 
 export default {
   data() {
@@ -230,7 +247,15 @@ export default {
       // 当前播放的音乐进度条位置
       currentProgress: 0,
       // 是否可移动进度条滑块
-      progressBlockCanMove: false
+      progressBlockCanMove: false,
+      lrc: {
+        lyric: '',
+        lyricUser: null,
+        tlyric: '',
+        transUser: null
+      },
+      lyricProgress: -1,
+      manualChangeProgress: false
     }
   },
   computed: {
@@ -274,10 +299,16 @@ export default {
       this.currentSong = this.tracks.find(item => item.id === newId)
       this.currentDt = Math.floor(this.currentSong.dt / 1000) * 1000
       this.backupUrl = `https://music.163.com/song/media/outer/url?id=${newId}.mp3`
-      const { data: res } = await api.getSongUrl(newId)
-      if (res.code === 200 && res.data[0].url) this.currentUrl = res.data[0].url
+      const [{ data: res1 }, { data: res2 }] = await Promise.all([api.getSongUrl(newId), api.getLyric(newId)])
+      if (res1.code === 200 && res1.data[0].url) this.currentUrl = res1.data[0].url
       else this.currentUrl = this.backupUrl
       this.audio.src = this.currentUrl
+      if (res2.code === 200) {
+        res2.lrc.lyric && (this.lrc.lyric = res2.lrc.lyric)
+        res2.lyricUser && (this.lrc.lyricUser = res2.lyricUser)
+        res2.tlyric && (this.lrc.tlyric = res2.tlyric.lyric)
+        res2.transUser && (this.lrc.transUser = res2.transUser)
+      }
     },
     canplay(val) {
       if (val) {
@@ -306,6 +337,7 @@ export default {
       if (this.progressBlockCanMove) return
       const sec = Math.floor(e.target.currentTime)
       const progress = (sec * 100000) / this.currentDt
+      this.lyricProgress = e.target.currentTime.toFixed(2) - 0
       this.currentProgress = progress
       this.currentTime = this.dayjs(0).second(sec).format('mm:ss')
     },
@@ -359,6 +391,7 @@ export default {
     changeProgressHandler() {
       if (!this.currentId) return
       this.audio.currentTime = Math.ceil((this.getPos(this.$refs.progressBar, 'x') * this.currentDt) / 1000)
+      this.manualChangeProgress = true
     },
     // 进度滑块点击事件
     clickBlockHandler() {
@@ -371,6 +404,7 @@ export default {
           this.progressBlockCanMove = false
           window.removeEventListener('mousemove', this.moveBlockHandler)
           this.audio.currentTime = (this.currentProgress * this.currentDt) / 100000
+          this.manualChangeProgress = true
         },
         { once: true }
       )
@@ -394,6 +428,7 @@ export default {
     liClickHandler(id) {
       if (this.currentId === id) {
         this.audio.currentTime = 0
+        this.manualChangeProgress = true
         this.audio.play()
       } else this.currentId = id
     },
@@ -421,6 +456,7 @@ export default {
     },
     // 下一首
     nextSong(auto) {
+      this.lyricProgress = -1
       if (auto === true) {
         if (!this.playQueue || this.currentIndex < 0) {
           this.resetCurrent()
@@ -428,6 +464,7 @@ export default {
         }
         if (this.playmode === 'single') {
           this.audio.currentTime = 0
+          this.manualChangeProgress = true
           this.audio.play()
           return
         }
@@ -441,6 +478,7 @@ export default {
     },
     // 上一首
     prevSong() {
+      this.lyricProgress = -1
       if (!this.playQueue || this.currentIndex < 0) return
       if (this.currentIndex === 0) {
         this.currentId = this.playQueue[this.playQueue.length - 1]
@@ -449,7 +487,7 @@ export default {
       }
     }
   },
-  components: { AddFolderIcon, CleanIcon, ArtistNames, XIcon }
+  components: { AddFolderIcon, CleanIcon, ArtistNames, XIcon, Lyric }
 }
 </script>
 
